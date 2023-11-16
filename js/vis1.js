@@ -30,6 +30,8 @@ function init() {
     canvasWidth = window.innerWidth * 0.7;
     canvasHeight = window.innerHeight * 0.7;
 
+
+
     // WebGL renderer
     renderer = new THREE.WebGLRenderer();
     renderer.setSize( canvasWidth, canvasHeight );
@@ -41,6 +43,7 @@ function init() {
 
     // dummy shader gets a color as input
     testShader = new TestShader([255.0, 255.0, 0.0]);
+    raycastShader = new raycastShader(volume);
 }
 
 /**
@@ -53,6 +56,7 @@ function readFile(){
 
         let data = new Uint16Array(reader.result);
         volume = new Volume(data);
+        console.log("data: "+ JSON.stringify(volume));
 
         resetVis();
     };
@@ -69,12 +73,23 @@ async function resetVis(){
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera( 75, canvasWidth / canvasHeight, 0.1, 1000 );
 
+    // const raycaster = new THREE.Raycaster();
+    // const pointer = new THREE.Vector2();
+    // pointer.x = canvasWidth/2;
+    // pointer.y = canvasHeight/2;
+    // let length = Math.sqrt(Math.pow(pointer.x,2)+ Math.pow(pointer.y,2));
+    // pointer.x = pointer.x/length;
+    // pointer.y = pointer.y/length;
+    // raycaster.setFromCamera(pointer, camera);
+
     // dummy scene: we render a box and attach our color test shader as material
-    const testCube = new THREE.BoxGeometry(volume.width, volume.height, volume.depth);
-    const testMaterial = testShader.material;
-    await testShader.load(); // this function needs to be called explicitly, and only works within an async function!
-    const testMesh = new THREE.Mesh(testCube, testMaterial);
-    scene.add(testMesh);
+    let mesh = await volume.getMesh();
+
+    scene.add(mesh);
+
+    // const intersects = raycaster.intersectObjects(scene.children);
+    // console.log("scene objects: " + JSON.stringify(scene.children));
+    // console.log("test: " + intersects);
 
     // our camera orbits around an object centered at (0,0,0)
     orbitCamera = new OrbitCamera(camera, new THREE.Vector3(0,0,0), 2*volume.max, renderer.domElement);
@@ -88,6 +103,8 @@ async function resetVis(){
  */
 function paint(){
     if (volume) {
+        volume.setCameraPosition(camera.position);
+
         renderer.render(scene, camera);
     }
 }
