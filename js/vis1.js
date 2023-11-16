@@ -14,6 +14,7 @@
  * @author Laura Luidolt
  * @author Diana Schalko
  */
+
 let renderer, camera, scene, orbitCamera;
 let canvasWidth, canvasHeight = 0;
 let container = null;
@@ -25,6 +26,7 @@ let testShader = null;
  * Load all data and initialize UI here.
  */
 function init() {
+
     // volume viewer
     container = document.getElementById("viewContainer");
     canvasWidth = window.innerWidth * 0.7;
@@ -43,7 +45,6 @@ function init() {
 
     // dummy shader gets a color as input
     testShader = new TestShader([255.0, 255.0, 0.0]);
-    raycastShader = new raycastShader(volume);
 }
 
 /**
@@ -81,15 +82,18 @@ async function resetVis(){
     // pointer.x = pointer.x/length;
     // pointer.y = pointer.y/length;
     // raycaster.setFromCamera(pointer, camera);
+    this.geometry = new THREE.BoxGeometry(this.width, this.height, this.depth);
 
+    let shader = new RaycastShader(volume);
+    await shader.load();
     // dummy scene: we render a box and attach our color test shader as material
-    let mesh = await volume.getMesh();
+    this.material = shader.material;
+    shader.setUniform("volumeScale", this.scale);
+    volume.shader=shader
+    let mesh = new THREE.Mesh(this.geometry, this.material);
+
 
     scene.add(mesh);
-
-    // const intersects = raycaster.intersectObjects(scene.children);
-    // console.log("scene objects: " + JSON.stringify(scene.children));
-    // console.log("test: " + intersects);
 
     // our camera orbits around an object centered at (0,0,0)
     orbitCamera = new OrbitCamera(camera, new THREE.Vector3(0,0,0), 2*volume.max, renderer.domElement);
@@ -104,7 +108,6 @@ async function resetVis(){
 function paint(){
     if (volume) {
         volume.setCameraPosition(camera.position);
-
         renderer.render(scene, camera);
     }
 }
