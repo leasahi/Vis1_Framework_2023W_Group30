@@ -84,15 +84,9 @@ async function resetVis(){
     // raycaster.setFromCamera(pointer, camera);
     this.geometry = new THREE.BoxGeometry(this.width, this.height, this.depth);
 
-    let shader = new RaycastShader(volume);
-    await shader.load();
-    this.material = shader.material;
-    shader.setUniform("volumeScale", volume.scale);
-    volume.shader=shader
-    let mesh = new THREE.Mesh(this.geometry, this.material);
+    const volumeMesh = await volume.getMesh();
 
-
-    scene.add(mesh);
+    scene.add(volumeMesh);
 
     // our camera orbits around an object centered at (0,0,0)
     orbitCamera = new OrbitCamera(camera, new THREE.Vector3(0,0,0), 2*volume.max, renderer.domElement);

@@ -32,8 +32,19 @@ class Volume {
         console.log(this.voxels.length + " voxels loaded - ["
             + this.width + ", " + this.height + ", " + this.depth + "], max: " + this.max);
 
+        this.geometry = new THREE.BoxGeometry(this.width, this.height, this.depth);
         this.shader = null;
+        this.material = null;
     }
+
+    async getMesh(){
+        this.shader = new RaycastShader(this);
+        await this.shader.load();
+        this.material = this.shader.material;
+        this.shader.setUniform("scale", this.scale);
+        return new THREE.Mesh( this.geometry, this.material );
+    }
+
     setCameraPosition(position){
         this.shader.setUniform("cameraPos",position);
     }
