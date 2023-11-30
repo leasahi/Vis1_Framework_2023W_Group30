@@ -1,6 +1,6 @@
-uniform int colorIdx;
-uniform ivec3 volume_dims;
-uniform highp sampler3D volume;
+precision highp sampler3D;
+uniform sampler3D volume;
+uniform vec3 volumeScale;
 
  flat in vec3 transformedEye;
  in vec3 rayDirection;
@@ -35,7 +35,7 @@ void main(){
 	t_hit.x = max(t_hit.x, 0.0);
 
 // Step 3: Compute the step size to march through the volume grid
-	vec3 dt_vec = 1.0 / (vec3(volume_dims) * abs(rayDirection));
+	vec3 dt_vec = 1.0 / (vec3(volumeScale) * abs(rayDirection));
 	float dt = min(dt_vec.x, min(dt_vec.y, dt_vec.z));
 
 

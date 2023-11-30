@@ -86,9 +86,8 @@ async function resetVis(){
 
     let shader = new RaycastShader(volume);
     await shader.load();
-    // dummy scene: we render a box and attach our color test shader as material
     this.material = shader.material;
-    shader.setUniform("volumeScale", this.scale);
+    shader.setUniform("volumeScale", volume.scale);
     volume.shader=shader
     let mesh = new THREE.Mesh(this.geometry, this.material);
 
@@ -107,6 +106,7 @@ async function resetVis(){
  */
 function paint(){
     if (volume) {
+
         volume.setCameraPosition(camera.position);
         renderer.render(scene, camera);
     }
