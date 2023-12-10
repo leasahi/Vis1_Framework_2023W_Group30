@@ -41,7 +41,7 @@ class Volume {
         this.shader = new RaycastShader(this);
         await this.shader.load();
         this.material = this.shader.material;
-        this.shader.setUniform("scale", this.scale);
+        this.shader.setUniform("volumeScale", this.scale);
         return new THREE.Mesh( this.geometry, this.material );
     }
 
