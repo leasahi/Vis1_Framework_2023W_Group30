@@ -53,11 +53,9 @@ function init() {
 function readFile(){
     let reader = new FileReader();
     reader.onloadend = function () {
-        console.log("data loaded: ");
 
         let data = new Uint16Array(reader.result);
         volume = new Volume(data);
-        console.log("data: "+ JSON.stringify(volume));
 
         resetVis();
     };
@@ -74,14 +72,6 @@ async function resetVis(){
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera( 75, canvasWidth / canvasHeight, 0.1, 1000 );
 
-    // const raycaster = new THREE.Raycaster();
-    // const pointer = new THREE.Vector2();
-    // pointer.x = canvasWidth/2;
-    // pointer.y = canvasHeight/2;
-    // let length = Math.sqrt(Math.pow(pointer.x,2)+ Math.pow(pointer.y,2));
-    // pointer.x = pointer.x/length;
-    // pointer.y = pointer.y/length;
-    // raycaster.setFromCamera(pointer, camera);
     this.geometry = new THREE.BoxGeometry(this.width, this.height, this.depth);
 
     const volumeMesh = await volume.getMesh();
@@ -100,7 +90,6 @@ async function resetVis(){
  */
 function paint(){
     if (volume) {
-
         volume.setCameraPosition(camera.position);
         renderer.render(scene, camera);
     }

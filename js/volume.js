@@ -29,8 +29,6 @@ class Volume {
         });
         this.voxels = Float32Array.from(floatArray);
 
-        console.log(this.voxels.length + " voxels loaded - ["
-            + this.width + ", " + this.height + ", " + this.depth + "], max: " + this.max);
 
         this.geometry = new THREE.BoxGeometry(this.width, this.height, this.depth);
         this.shader = null;

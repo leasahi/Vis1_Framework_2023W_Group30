@@ -6,6 +6,8 @@ uniform vec3 volumeScale;
  in vec3 rayDirection;
 
 
+// Intersect box implementation by Will Usher
+// https://www.willusher.io/webgl/2019/01/13/volume-rendering-with-webgl
 vec2 intersect_box(vec3 orig, vec3 dir) {
 	const vec3 box_min = vec3(0);
 	const vec3 box_max = vec3(1);
@@ -27,10 +29,10 @@ void main(){
 	}
 	hit.x = max(hit.x, 0.0);
 
-	// start position
+	// start
 	vec3 start = transformedEye + hit.x * dir;
 
-	// steps
+	// calculate steps
 	vec3 dt_vec = 1.0 / (vec3(volumeScale) * abs(dir));
 	float dt = min(dt_vec.x, min(dt_vec.y, dt_vec.z));
 
@@ -42,28 +44,22 @@ void main(){
 	vec3 rayPosCurr = start;
 	float voxelCurr;
 
-	// actual position of the first hit
-	vec3 fragPos = vec3(0.5);
-
-	// accumulated color and alpha
-	vec3 colAcc = vec3(0);
-	float alphaAcc = 0.0;
+	// alpha
+	float alphaVal = 0.0;
 
 	// step along ray
 	for(float t = hit.x; t < hit.y; t += dt){
 
-		// read current voxel value
+		// get current voxel
 		rayPosCurr += dir * dt;
 		voxelCurr = texture(volume, rayPosCurr.xyz).r;
 
-
-		// not very nice variable names, somehow hacked in ;)
-		if(voxelCurr > alphaAcc){
-			alphaAcc = voxelCurr;
-			colAcc = vec3(1.0);
+		// increase alpha
+		if(voxelCurr > alphaVal){
+			alphaVal = voxelCurr;
 		}
 
 	}
 	// set fragment color
-    gl_FragColor = vec4(colAcc, alphaAcc);
+    gl_FragColor = vec4(vec3(1.0), alphaVal);
 }
