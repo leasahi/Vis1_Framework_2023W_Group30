@@ -81,6 +81,88 @@ async function resetVis(){
     // our camera orbits around an object centered at (0,0,0)
     orbitCamera = new OrbitCamera(camera, new THREE.Vector3(0,0,0), 2*volume.max, renderer.domElement);
 
+    // Density Histogramm:
+
+    // SVG-Container-Größe
+    const width = 600;
+    const height = 400;
+
+    // Margen
+    const margin = {top: 20, right: 20, bottom: 50, left: 40};
+
+    // SVG-Container erstellen
+    const svg = d3
+        .select("#histogram-container")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Skala für die x-Achse
+    const x = d3.scaleLinear().domain([0, 1]).range([0, width]);
+
+    // Skala für die y-Achse
+    const y = d3.scaleLinear().range([height, 0]);
+
+    // Histogramm erstellen
+    const histogram = d3
+        .histogram()
+        .domain(x.domain())
+        .thresholds(x.ticks(100)); // Anzahl der Bins
+
+    // Skala für die y-Achse anpassen
+    y.domain([0, 1]);
+
+    // Daten hinzufügen:
+    const bins = histogram(volume.voxels);
+
+    console.log(volume.voxels);
+
+    // Balken Erstellung
+    svg
+        .selectAll("rect")
+        .data(bins)
+        .enter()
+        .append("rect")
+        .attr("x", (d) => x(d.x0))
+        .attr("y", (d) => y(d.length))
+        .attr("width", (d) => Math.max(0, x(d.x1) - x(d.x0) - 1))
+        .attr("height", (d) => height - y(d.length))
+        .attr("fill", "#444");
+
+
+    // Achsen hinzufügen
+    svg
+        .append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(
+            d3
+                .axisBottom(x)
+        )
+        .append("text")
+        .style("text-anchor", "middle")
+        .attr("x", width - margin.right)
+        .attr("y", 20)
+        .attr("dy", 15) // Abstand unter der X-Achse
+        .attr("fill", "white")
+        .text("density"); // Beschriftung der X-Achse
+
+    svg
+        .append("g")
+        .call(
+            d3
+                .axisLeft(y)
+        )
+        .append("text")
+        .style("text-anchor", "middle")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -margin.top)
+        .attr("y", -20)
+        .attr("dy", -15) // Abstand links der Y-Achse
+        .attr("fill", "white")
+        .text("intensity"); // Beschriftung der Y-Achse
+
     // init paint loop
     requestAnimationFrame(paint);
 }
