@@ -103,7 +103,7 @@ async function resetVis(){
     const x = d3.scaleLinear().domain([0, 1]).range([0, width]);
 
     // Skala für die y-Achse
-    const y = d3.scaleLinear().range([height, 0]);
+    const y = d3.scaleLinear().domain([0, 1]).range([height, 0]);
 
     // Histogramm erstellen
     const histogram = d3
@@ -111,13 +111,20 @@ async function resetVis(){
         .domain(x.domain())
         .thresholds(x.ticks(100)); // Anzahl der Bins
 
-    // Skala für die y-Achse anpassen
-    y.domain([0, 1]);
-
     // Daten hinzufügen:
-    const bins = histogram(volume.voxels);
+    nonZero = volume.voxels.filter(value => value !== 0);
+    ratio = Math.max.apply(Math, nonZero)/100;
+    range = Math.max(...nonZero) - Math.min(...nonZero);
 
-    console.log(volume.voxels);
+    norm = nonZero.map(value => value / range);
+    const bins = histogram(norm);
+
+    // Skala für die y-Achse anpassen
+    y.domain([0, d3.max(bins, (d) => d.length)]);
+
+
+   // console.log(volume.voxels);
+    console.log(bins);
 
     // Balken Erstellung
     svg
