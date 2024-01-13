@@ -46,4 +46,12 @@ class Volume {
     setCameraPosition(position){
         this.shader.setUniform("cameraPos",position);
     }
+
+    setIso(iso){
+        this.shader.setUniform("isoValue", iso);
+    }
+
+    setMethod(mode) {
+        this.shader.setUniform("method", mode);
+    }
 }

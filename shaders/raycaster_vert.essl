@@ -8,12 +8,7 @@
 
 void main() {
 
-   // scale everything down to unit space [0,1] -> cameraPos -> divide using volumeScale
-   // translate the eye to the center by adding the half of the unit cube dimension -> 0.5
     transformedEye = cameraPos / volumeScale + 0.5;
-
-   //first scale down, then translate it to the center with + 0.5
-   //get the ray direction by subtracting with the transformed eyeposition
     rayDirection = (position / volumeScale + 0.5) - transformedEye;
 
     vec4 mvPosition = modelViewMatrix * vec4( position, 1.0);

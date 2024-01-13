@@ -5,6 +5,10 @@ uniform vec3 volumeScale;
  flat in vec3 transformedEye;
  in vec3 rayDirection;
 
+ uniform float isoValue;
+
+//MIP = 0, ISO = 1
+uniform int method;
 
 // Intersect box implementation by Will Usher
 // https://www.willusher.io/webgl/2019/01/13/volume-rendering-with-webgl
@@ -22,6 +26,7 @@ vec2 intersect_box(vec3 orig, vec3 dir) {
 }
 
 void main(){
+
 	vec3 dir = normalize(rayDirection);
 	vec2 hit = intersect_box(transformedEye, dir);
 	if (hit.x > hit.y) {
@@ -44,22 +49,52 @@ void main(){
 	vec3 rayPosCurr = start;
 	float voxelCurr;
 
-	// alpha
+	// alpha & color
 	float alphaVal = 0.0;
+	vec4 finalColor = vec4(0.0);
 
 	// step along ray
 	for(float t = hit.x; t < hit.y; t += dt){
 
 		// get current voxel
 		rayPosCurr += dir * dt;
-		voxelCurr = texture(volume, rayPosCurr.xyz).r;
+        // Sample the volume data of the previous and current voxel
+		voxelPrev = texture(volume, rayPosCurr.xyz).r;
+		voxelCurr = texture(volume, rayPosCurr + dir * dt).r;
 
-		// increase alpha
-		if(voxelCurr > alphaVal){
-			alphaVal = voxelCurr;
-		}
+        // First Hit Compositing:
+        if (method == 1){
 
-	}
-	// set fragment color
-    gl_FragColor = vec4(vec3(1.0), alphaVal);
+            // Verify whether the isovalue is above the current voxel and at or below the next voxel
+            if (voxelPrev < isoValue && voxelCurr >= isoValue) {
+
+                // Interpolation factor
+                float factor = (isoValue - voxelPrev) / (voxelCurr - voxelPrev);
+
+                // Interpolate the 3D position
+                vec3 hitPos = mix(rayPosCurr, rayPosCurr + dir * dt, factor);
+
+                // Update the final color
+                finalColor.rgb = hitPos;
+                finalColor.a = 1.0;
+                break;
+            }
+
+            // Break out of the loop if the accumulated alpha is close to 1.0
+            if (alphaVal >= 0.95) {
+                break;
+            }
+         }
+
+        // MIP:
+         else if (method == 0){
+            // increase alpha
+            if(voxelCurr > alphaVal){
+                alphaVal = voxelCurr;
+                finalColor = vec4(vec3(1.0), alphaVal);
+            }
+        }
+    }
+    // set fragment color
+    gl_FragColor = vec4(finalColor);
 }

@@ -144,8 +144,7 @@ async function resetVis(){
         .append("g")
         .attr("transform", `translate(0,${height})`)
         .call(
-            d3
-                .axisBottom(x)
+            d3.axisBottom(x)
         )
         .append("text")
         .style("text-anchor", "middle")
@@ -158,8 +157,7 @@ async function resetVis(){
     svg
         .append("g")
         .call(
-            d3
-                .axisLeft(y)
+            d3.axisLeft(y)
         )
         .append("text")
         .style("text-anchor", "middle")
@@ -180,6 +178,10 @@ async function resetVis(){
 function paint(){
     if (volume) {
         volume.setCameraPosition(camera.position);
+        // TODO change ISO manually
+        volume.setIso(0.3);
+        // TODO change mode manually
+        volume.setMethod(1);
         renderer.render(scene, camera);
     }
 }
