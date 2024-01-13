@@ -36,8 +36,8 @@ function init() {
 
     // WebGL renderer
     renderer = new THREE.WebGLRenderer();
-    renderer.setSize( canvasWidth, canvasHeight );
-    container.appendChild( renderer.domElement );
+    renderer.setSize(canvasWidth, canvasHeight);
+    container.appendChild(renderer.domElement);
 
     // read and parse volume file
     fileInput = document.getElementById("upload");
@@ -50,7 +50,7 @@ function init() {
 /**
  * Handles the file reader. No need to change anything here.
  */
-function readFile(){
+function readFile() {
     let reader = new FileReader();
     reader.onloadend = function () {
 
@@ -67,10 +67,10 @@ function readFile(){
  *
  * Currently renders the bounding box of the volume.
  */
-async function resetVis(){
+async function resetVis() {
     // create new empty scene and perspective camera
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera( 75, canvasWidth / canvasHeight, 0.1, 1000 );
+    camera = new THREE.PerspectiveCamera(75, canvasWidth / canvasHeight, 0.1, 1000);
 
     this.geometry = new THREE.BoxGeometry(this.width, this.height, this.depth);
 
@@ -79,7 +79,7 @@ async function resetVis(){
     scene.add(volumeMesh);
 
     // our camera orbits around an object centered at (0,0,0)
-    orbitCamera = new OrbitCamera(camera, new THREE.Vector3(0,0,0), 2*volume.max, renderer.domElement);
+    orbitCamera = new OrbitCamera(camera, new THREE.Vector3(0, 0, 0), 2 * volume.max, renderer.domElement);
 
     // Density Histogramm:
 
@@ -113,29 +113,27 @@ async function resetVis(){
 
     // Daten hinzufügen:
     nonZero = volume.voxels.filter(value => value !== 0);
-    ratio = Math.max.apply(Math, nonZero)/100;
-    range = Math.max(...nonZero) - Math.min(...nonZero);
 
-    norm = nonZero.map(value => value / range);
-    const bins = histogram(norm);
+    const bins = histogram(nonZero);
 
-    // Skala für die y-Achse anpassen
-    y.domain([0, d3.max(bins, (d) => d.length)]);
-
-
-   // console.log(volume.voxels);
-    console.log(bins);
+    let max = d3.max(bins, (d) => d.length);
+    let data = bins.map((bin) => {
+        const y = bin.length / max;
+        const x0 = bin.x0;
+        const x1 = bin.x1;
+        return {x0, x1, y};
+    });
 
     // Balken Erstellung
     svg
         .selectAll("rect")
-        .data(bins)
+        .data(data)
         .enter()
         .append("rect")
         .attr("x", (d) => x(d.x0))
-        .attr("y", (d) => y(d.length))
+        .attr("y", (d) => y(d.y))
         .attr("width", (d) => Math.max(0, x(d.x1) - x(d.x0) - 1))
-        .attr("height", (d) => height - y(d.length))
+        .attr("height", (d) => height - y(d.y))
         .attr("fill", "#444");
 
 
@@ -144,7 +142,8 @@ async function resetVis(){
         .append("g")
         .attr("transform", `translate(0,${height})`)
         .call(
-            d3.axisBottom(x)
+            d3
+                .axisBottom(x)
         )
         .append("text")
         .style("text-anchor", "middle")
@@ -154,11 +153,12 @@ async function resetVis(){
         .attr("fill", "white")
         .text("density"); // Beschriftung der X-Achse
 
+    let yAxis = d3.axisLeft(y)
+    yAxis.scale(y)
+
     svg
         .append("g")
-        .call(
-            d3.axisLeft(y)
-        )
+        .call(yAxis)
         .append("text")
         .style("text-anchor", "middle")
         .attr("transform", "rotate(-90)")
@@ -175,7 +175,7 @@ async function resetVis(){
 /**
  * Render the scene and update all necessary shader information.
  */
-function paint(){
+function paint() {
     if (volume) {
         volume.setCameraPosition(camera.position);
         // TODO change ISO manually
