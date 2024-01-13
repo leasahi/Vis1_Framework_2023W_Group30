@@ -59,8 +59,8 @@ void main(){
 		// get current voxel
 		rayPosCurr += dir * dt;
         // Sample the volume data of the previous and current voxel
-		voxelPrev = texture(volume, rayPosCurr.xyz).r;
-		voxelCurr = texture(volume, rayPosCurr + dir * dt).r;
+		voxelPrev = texture(volume, rayPosPrev.xyz).r;
+		voxelCurr = texture(volume, rayPosCurr).r;
 
         // First Hit Compositing:
         if (method == 1){
