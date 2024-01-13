@@ -31,7 +31,14 @@
 
 <!-- data selector -->
 <p>Select your data here: <input id="upload" type="file"></p>
+<select name="dropdown" id="mode">
+    <option value="1">First-Hit-Compositing</option>
+    <option value="0">MIP</option>
+</select>
 
+<br>
+<input type="range" min="0.0" max="1.0" name="iso" id="iso" step="0.1" oninput="this.nextElementSibling.value = this.value">
+<output>0.5</output>
 <div class="container">
 
     <!-- volume rendering container -->
@@ -44,14 +51,7 @@
 
 </div>
 
-<select name="dropdown" id="mode">
-    <option value="1">First-Hit-Compositing</option>
-    <option value="0">MIP</option>
-</select>
 
-<br>
-<input type="range" min="0.0" max="1.0" name="iso" id="iso" step="0.1" oninput="this.nextElementSibling.value = this.value">
-<output>0.3</output>
 
 
 
