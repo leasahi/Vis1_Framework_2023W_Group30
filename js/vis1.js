@@ -21,6 +21,9 @@ let container = null;
 let volume = null;
 let fileInput = null;
 let testShader = null;
+let dropdown = null;
+let mode = 1;
+let iso = 0.3;
 
 /**
  * Load all data and initialize UI here.
@@ -42,6 +45,14 @@ function init() {
     // read and parse volume file
     fileInput = document.getElementById("upload");
     fileInput.addEventListener('change', readFile);
+
+    // mode selection
+    dropdown = document.getElementById("mode");
+    dropdown.addEventListener('change', changeMode);
+
+    // mode selection
+    isoNumberField = document.getElementById("iso");
+    isoNumberField.addEventListener('change', changeIso);
 
     // dummy shader gets a color as input
     testShader = new TestShader([255.0, 255.0, 0.0]);
@@ -178,10 +189,20 @@ async function resetVis() {
 function paint() {
     if (volume) {
         volume.setCameraPosition(camera.position);
-        // TODO change ISO manually
-        volume.setIso(0.3);
-        // TODO change mode manually
-        volume.setMethod(1);
+        console.log(iso);
+        volume.setIso(iso);
+        volume.setMethod(mode);
         renderer.render(scene, camera);
     }
 }
+
+function changeMode(){
+    mode = parseInt(dropdown.value);
+    requestAnimationFrame(paint);
+}
+
+function changeIso(){
+    iso = parseFloat(isoNumberField.value);
+    requestAnimationFrame(paint);
+}
+
